@@ -196,6 +196,12 @@ export default function App() {
            </div>
         </div>
       </div>
+
+      <footer className="mt-auto pt-10 pb-4 text-center">
+          <p className={`text-[10px] font-bold tracking-[0.3em] flex items-center justify-center ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            made with<Heart size={10} fill="currentColor" className="text-rose-500 animate-bounce" />
+          </p>
+      </footer>
       
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 4px; } 
