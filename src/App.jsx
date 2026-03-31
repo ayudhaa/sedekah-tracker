@@ -21,14 +21,21 @@ export default function App() {
 
   const currentHour = currentTime.getHours();
   const isSubuhTime = currentHour >= 4 && currentHour <= 6;
-
   const formatIndoDate = (dateString) => {
     const date = new Date(dateString);
+    if (isNaN(date)) return "Tanggal Tidak Valid";
     return date.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     });
+  };
+
+  const getTodayISO = () => {
+    const now = new Date();
+    return new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split('T')[0];
   };
 
   const getSkyTheme = () => {
@@ -54,30 +61,42 @@ export default function App() {
   const calculateStreak = (logs) => {
     if (logs.length === 0) { setStreak(0); return; }
     const uniqueDates = [...new Set(logs.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
+    
     let count = 0;
     let checkDate = new Date();
-    checkDate.setHours(0,0,0,0);
+    checkDate.setHours(0, 0, 0, 0);
+
     for (let dateStr of uniqueDates) {
-      const d = new Date(dateStr); d.setHours(0,0,0,0);
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      
       const diff = Math.floor((checkDate - d) / 86400000);
-      if (diff <= 1) { count++; checkDate = d; } else break;
+      if (diff <= 1) { 
+        count++; 
+        checkDate = d; 
+      } else {
+        break;
+      }
     }
     setStreak(count);
   };
 
   const checkToday = (logs) => {
-    const today = new Date().toLocaleDateString();
-    setHasDoneToday(logs.some(log => log.date === today));
+    const todayISO = getTodayISO();
+    setHasDoneToday(logs.some(log => log.date === todayISO));
   };
 
   const logSedekah = () => {
     if (hasDoneToday) return;
+    
+    const todayISO = getTodayISO();
     const newLog = {
       id: Date.now(),
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: todayISO,
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       isGolden: isSubuhTime
     };
+
     const updated = [newLog, ...history];
     setHistory(updated);
     localStorage.setItem('sedekah_logs', JSON.stringify(updated));
@@ -95,7 +114,6 @@ export default function App() {
   };
 
   const isDark = currentHour >= 18 || currentHour < 6;
-
   return (
     <div className={`min-h-screen transition-all duration-[2000ms] font-sans p-6 md:p-8 ${getSkyTheme()}`}>
       <div className="max-w-md mx-auto">
